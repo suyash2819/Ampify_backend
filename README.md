@@ -1,3 +1,39 @@
 # Ampify_backend
 
-{"type":"excalidraw/clipboard","elements":[{"id":"VVVUR39FLX7brgmKbVGQg","type":"text","x":286,"y":140,"width":239.6598358154297,"height":25,"angle":0,"strokeColor":"#099268","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"frameId":null,"index":"a0","roundness":null,"seed":275472091,"version":65,"versionNonce":1645030965,"isDeleted":false,"boundElements":null,"updated":1742757367024,"link":null,"locked":false,"text":"Spotify Type Web App - ","fontSize":20,"fontFamily":5,"textAlign":"left","verticalAlign":"top","containerId":null,"originalText":"Spotify Type Web App - ","autoResize":true,"lineHeight":1.25},{"id":"E72DZ9mx7i8znPJjTv1mq","type":"text","x":282.2952968381584,"y":614,"width":223.4199429093965,"height":23.62866827306544,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"frameId":null,"index":"a4","roundness":null,"seed":119711381,"version":582,"versionNonce":1361604309,"isDeleted":false,"boundElements":null,"updated":1742757360921,"link":null,"locked":false,"text":"Sys Design - HLD","fontSize":18.902934618452353,"fontFamily":5,"textAlign":"left","verticalAlign":"top","containerId":null,"originalText":"Sys Design - HLD","autoResize":false,"lineHeight":1.25},{"id":"PfHR-EuNSidV3eaXdEHld","type":"text","x":281,"y":671,"width":808.8193359375,"height":25,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"frameId":null,"index":"b09","roundness":null,"seed":131433717,"version":153,"versionNonce":2032477467,"isDeleted":false,"boundElements":null,"updated":1742757207774,"link":null,"locked":false,"text":"Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed","fontSize":20,"fontFamily":5,"textAlign":"left","verticalAlign":"top","containerId":null,"originalText":"Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed","autoResize":true,"lineHeight":1.25},{"id":"5rMhj2A5n33jImA3jW_66","type":"text","x":287,"y":7,"width":362.83978271484375,"height":75,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"frameId":null,"index":"b0K","roundness":null,"seed":1685932859,"version":84,"versionNonce":1877180597,"isDeleted":false,"boundElements":null,"updated":1742759121808,"link":null,"locked":false,"text":"Tech Stack:\n\nNode, React (TypeScript), AWS RDS ","fontSize":20,"fontFamily":5,"textAlign":"left","verticalAlign":"top","containerId":null,"originalText":"Tech Stack:\n\nNode, React (TypeScript), AWS RDS ","autoResize":true,"lineHeight":1.25}],"files":{}}
+Spotify Like App.
+
+
+<h2> functional requirements - Features </h2>
+
+1. user should be able to see the home page without sign up, but they should not be able to listen to any music
+2. user should be able to sign up, redirect to sign in after sign up
+3. user should be able to sign in
+    3.a. User should be able to fill a survey on what he/she likes to listen (choose artist)
+4. user should see the home page with the preferred choice in 3.a
+5. user should be able to click on that choice and play the music
+6. user should be able to search for a music
+7. user can create playlists
+8. user can like the songs
+9. user can play from liked songs
+10. Add songs into queue while playing the songs
+
+non functional req - not needed rn
+scalability - support 1L users
+availability - music should be available, availability > consistency here
+
+<h2>System Design</h2>
+
+Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed
+
+![image](https://github.com/user-attachments/assets/99390391-8a9a-42d9-bc92-67e2b1891603)
+
+<h2>Apis</h2>
+
+/user/signup - POST
+/user/signin - POST
+/getStaticData - GET
+/userMusicData - POST, GET
+
+<h2>Tables</h2>
+
+![image](https://github.com/user-attachments/assets/1ed29a1b-4613-4f2f-b445-b7aa5f46abec)
