@@ -29,10 +29,10 @@ Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed
 
 <h2>Apis</h2>
 
-/user/signup - POST
-/user/signin - POST
-/getStaticData - GET
-/userMusicData - POST, GET
+/user/signup - POST <br/>
+/user/signin - POST <br/>
+/getStaticData - GET <br/>
+/userMusicData - POST, GET <br/>
 
 <h2>Tables</h2>
 
