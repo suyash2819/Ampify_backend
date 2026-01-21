@@ -1,0 +1,12 @@
+.venv/
+
+# Byte-code files
+*.pyc
+__pycache__/
+
+# IDE-specific files (e.g., VS Code, PyCharm)
+.vscode/
+.idea/
+
+# Environment variables file
+.env
