@@ -37,5 +37,5 @@ Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed
 
 <h2>Tables</h2>
 
-<img width="1456" height="778" alt="image" src="https://github.com/user-attachments/assets/3260bb64-944f-41c3-923c-174fe3be98e3" />
+<img width="968" height="464" alt="image" src="https://github.com/user-attachments/assets/745e3a40-a0bf-4702-bb53-b2c090746ea8" />
 
