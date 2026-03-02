@@ -4,7 +4,7 @@ from core.security import create_access_token, verify_password
 from repositories.memory_repo import repo
 from schemas.auth import SigninRequest, TokenResponse
 
-router = APIRouter(prefix="/user")
+router = APIRouter(prefix="/user", tags=["auth"],)
 
 
 @router.post("/signin", response_model=TokenResponse)

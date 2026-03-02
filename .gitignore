@@ -12,3 +12,5 @@ __pycache__/
 .env
 
 certs/
+
+cockroach_sql_user_pwd.txt
