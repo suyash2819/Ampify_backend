@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from connection.cockroachDB import get_connection
 from core.security import hash_password
-from schemas.user import UserOut, UserCreate, UserUpdate
+from schemas.user import UserOut, UserCreate, UserRecord, UserUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +63,36 @@ class UsersRepository:
                         id=result[0],
                         name=result[1],
                         email=result[2],
+                        created_at=result[4],
+                        updated_at=result[5]
+                    )
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error retrieving user: {e}")
+            raise
+        finally:
+            conn.close()
+
+    def get_user_with_password_by_email(self, email: str) -> Optional[UserRecord]:
+        """Retrieve user with password hash by email (for authentication)."""
+        conn = get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, name, email, password_hash, created_at, updated_at
+                    FROM users
+                    WHERE email = %s
+                """, (email.strip().lower(),))
+                
+                result = cur.fetchone()
+                
+                if result:
+                    return UserRecord(
+                        id=result[0],
+                        name=result[1],
+                        email=result[2],
+                        password_hash=result[3],
                         created_at=result[4],
                         updated_at=result[5]
                     )

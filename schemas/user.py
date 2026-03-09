@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, NamedTuple, Optional
 from datetime import datetime
 
 from pydantic import BaseModel, Field, EmailStr
@@ -27,12 +27,19 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
-
+        
+class UserRecord(NamedTuple):
+    """Internal user record with password hash for authentication."""
+    id: str
+    name: str
+    email: str
+    password_hash: str
+    created_at: str
+    updated_at: str
 
 
 class PreferencesRequest(BaseModel):
     artist_ids: List[int] = Field(default_factory=list)
-
 
 class PreferencesOut(BaseModel):
     artist_ids: List[int]
