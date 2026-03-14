@@ -1,12 +1,10 @@
 from fastapi import FastAPI
 
-# from connection.rds import RdsConnection
-from routers import api_router
+from core.config import API_PREFIX
+from routers import auth
 
 app = FastAPI()
-# rdsConnection = RdsConnection()
-app.include_router(api_router, prefix="/api/v1")
-
+app.include_router(auth.router, prefix=API_PREFIX)
 
 @app.get("/")
 async def root():
