@@ -3,3 +3,4 @@ psycopg2-binary
 boto3
 python-jose[cryptography]
 passlib[bcrypt]
+google-cloud-storage
