@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+os.environ["DATABASE_URL"] = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:26257/defaultdb?sslmode=disable")
 def get_connection():
     """Establish and return a CockroachDB connection."""
     return psycopg2.connect(os.environ["DATABASE_URL"])
