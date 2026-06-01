@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from core.security import create_access_token, verify_password
 from repositories.users_repo import users_repo
-from schemas.auth import SigninRequest, TokenResponse
+from schemas.auth import SigninRequest, TokenResponse, SignupResponse
 from schemas.user import UserOut, UserCreate
 
 router = APIRouter(prefix="/user", tags=["auth"],)
@@ -24,9 +24,9 @@ def signin(payload: SigninRequest):
     token = create_access_token(subject=str(user.id))
     return TokenResponse(access_token=token)
 
-@router.post("/signup", response_model=UserOut)
+@router.post("/signup", response_model=SignupResponse)
 def signup(payload: UserCreate):
-    """Register a new user."""
+    """Register a new user and return access token."""
     # Check if user already exists
     existing_user = users_repo.get_user_by_email(payload.email)
     if existing_user:
@@ -36,4 +36,13 @@ def signup(payload: UserCreate):
         )
     
     new_user = users_repo.create_user(payload)
-    return new_user
+    token = create_access_token(subject=str(new_user.id))
+    
+    return SignupResponse(
+        id=new_user.id,
+        name=new_user.name,
+        email=new_user.email,
+        created_at=new_user.created_at,
+        updated_at=new_user.updated_at,
+        access_token=token
+    )
