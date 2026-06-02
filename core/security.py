@@ -6,9 +6,7 @@ from jose import jwt
 from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
 
-JWT_SECRET_KEY = "dev_only_change_me"
-JWT_ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+from core.config import JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
