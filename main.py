@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import API_PREFIX
 from routers import auth, artists, genres, preferences
+from routers import songs
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(artists.router, prefix=API_PREFIX)
 app.include_router(genres.router, prefix=API_PREFIX)
 app.include_router(preferences.router, prefix=API_PREFIX)
+app.include_router(songs.router, prefix=API_PREFIX)
 
 @app.get("/")
 async def root():

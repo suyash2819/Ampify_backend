@@ -70,5 +70,73 @@ class GCPStorageClient:
             logger.error(f"Error deleting file: {e}")
             raise e
 
+    def stream_blob(self, source_blob_name: str, chunk_size: int = 262144):
+        """Stream a blob from the bucket in chunks.
+
+        Yields bytes chunks suitable for use with StreamingResponse.
+        """
+        if not self.bucket:
+            raise Exception("GCP Storage Client not initialized.")
+
+        try:
+            blob = self.bucket.blob(source_blob_name)
+            # Use the blob as a file-like object for streaming
+            with blob.open("rb") as stream:
+                while True:
+                    chunk = stream.read(chunk_size)
+                    if not chunk:
+                        break
+                    yield chunk
+        except Exception as e:
+            logger.error(f"Error streaming blob {source_blob_name}: {e}")
+            raise e
+
+    def get_blob_size(self, source_blob_name: str) -> int:
+        """Return the size in bytes for the given blob."""
+        if not self.bucket:
+            raise Exception("GCP Storage Client not initialized.")
+
+        try:
+            blob = self.bucket.get_blob(source_blob_name)
+            if not blob:
+                raise Exception(f"Blob {source_blob_name} not found")
+            return blob.size
+        except Exception as e:
+            logger.error(f"Error getting blob size for {source_blob_name}: {e}")
+            raise e
+
+    def stream_blob_range(self, source_blob_name: str, start: int = 0, end: int = None, chunk_size: int = 262144):
+        """Stream a byte range [start, end] from the blob.
+
+        If `end` is None, streams until EOF. `end` is inclusive.
+        """
+        if not self.bucket:
+            raise Exception("GCP Storage Client not initialized.")
+
+        try:
+            blob = self.bucket.blob(source_blob_name)
+            with blob.open("rb") as stream:
+                stream.seek(start)
+                bytes_remaining = None
+                if end is not None:
+                    # end is inclusive, compute bytes to read
+                    bytes_remaining = end - start + 1
+
+                while True:
+                    read_size = chunk_size if bytes_remaining is None else min(chunk_size, bytes_remaining)
+                    if read_size <= 0:
+                        break
+                    chunk = stream.read(read_size)
+                    if not chunk:
+                        break
+                    yield chunk
+                    if bytes_remaining is not None:
+                        bytes_remaining -= len(chunk)
+                        if bytes_remaining <= 0:
+                            break
+        except Exception as e:
+            logger.error(f"Error streaming blob range {source_blob_name} ({start}-{end}): {e}")
+            raise e
+
 # Singleton instance to be used across the app
 storage_client = GCPStorageClient()
