@@ -1,6 +1,6 @@
 from google.cloud import storage
 import logging
-from core.config import GCP_PROJECT_ID, GCP_BUCKET_NAME
+from core.config import GCP_PROJECT_ID, GCP_BUCKET_NAME, GCP_SONGS_BUCKET_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +9,9 @@ class GCPStorageClient:
         try:
             self.client = storage.Client(project=GCP_PROJECT_ID)
             self.bucket_name = GCP_BUCKET_NAME
+            self.songs_bucket_name = GCP_SONGS_BUCKET_NAME
             self.bucket = self.client.bucket(self.bucket_name)
+            self.songs_bucket = self.client.bucket(self.songs_bucket_name)
             logger.info(f"Initialized GCP Storage Client for bucket: {self.bucket_name}")
         except Exception as e:
             logger.error(f"Failed to initialize GCP Storage Client: {e}")
@@ -75,11 +77,11 @@ class GCPStorageClient:
 
         Yields bytes chunks suitable for use with StreamingResponse.
         """
-        if not self.bucket:
+        if not self.songs_bucket:
             raise Exception("GCP Storage Client not initialized.")
 
         try:
-            blob = self.bucket.blob(source_blob_name)
+            blob = self.songs_bucket.blob(source_blob_name)
             # Use the blob as a file-like object for streaming
             with blob.open("rb") as stream:
                 while True:
@@ -93,11 +95,11 @@ class GCPStorageClient:
 
     def get_blob_size(self, source_blob_name: str) -> int:
         """Return the size in bytes for the given blob."""
-        if not self.bucket:
+        if not self.songs_bucket:
             raise Exception("GCP Storage Client not initialized.")
 
         try:
-            blob = self.bucket.get_blob(source_blob_name)
+            blob = self.songs_bucket.get_blob(source_blob_name)
             if not blob:
                 raise Exception(f"Blob {source_blob_name} not found")
             return blob.size
@@ -110,11 +112,11 @@ class GCPStorageClient:
 
         If `end` is None, streams until EOF. `end` is inclusive.
         """
-        if not self.bucket:
+        if not self.songs_bucket:
             raise Exception("GCP Storage Client not initialized.")
 
         try:
-            blob = self.bucket.blob(source_blob_name)
+            blob = self.songs_bucket.blob(source_blob_name)
             with blob.open("rb") as stream:
                 stream.seek(start)
                 bytes_remaining = None

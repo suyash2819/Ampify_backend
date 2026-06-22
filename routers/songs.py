@@ -23,9 +23,46 @@ def stream_song(song_id: str, request: Request):
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
 
-    blob_name = song.file_path
+    # Ensure we pass an object name (not a full URL) to GCP client
+    def _extract_object_name(path: str) -> str:
+        from urllib.parse import urlparse, unquote
+
+        if not path:
+            return path
+
+        # gs://bucket/object
+        if path.startswith("gs://"):
+            without = path[len("gs://"):]
+            parts = without.split("/", 1)
+            return parts[1] if len(parts) == 2 else ""
+
+        # http(s)://...
+        if path.startswith("http://") or path.startswith("https://"):
+            parsed = urlparse(path)
+            p = parsed.path.lstrip("/")
+            parts = p.split("/", 1)
+            # common form: /<bucket>/<object>
+            if len(parts) == 2:
+                return unquote(parts[1])
+
+            # handle /download/storage/v1/b/<bucket>/o/<object> (object is URL-encoded)
+            segs = p.split("/")
+            try:
+                b_index = segs.index("b")
+                o_index = segs.index("o")
+                obj = "/".join(segs[o_index+1:])
+                return unquote(obj)
+            except ValueError:
+                pass
+
+            return unquote(p)
+
+        # already an object name
+        return path
+
+    blob_name = _extract_object_name(song.file_path)
     # Prefer stored file_type (MIME) from DB when available
-    mime_type = song.file_type or mimetypes.guess_type(song.file_name)[0] or "application/octet-stream"
+    mime_type = song.file_type or "application/octet-stream"
 
     # Get total size
     try:
@@ -38,7 +75,7 @@ def stream_song(song_id: str, request: Request):
 
     headers = {
         "Accept-Ranges": "bytes",
-        "Content-Disposition": f'inline; filename="{song.file_name}"',
+        "Content-Disposition": f'inline; filename="{song.name}"',
     }
 
     if range_header is None:

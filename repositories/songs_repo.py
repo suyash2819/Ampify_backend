@@ -15,7 +15,7 @@ class SongsRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, name, file_path, file_name, file_type, artist_id, genre_id
+                    SELECT id, name, file_path, file_type, artist_id, genre_id
                     FROM songs
                     ORDER BY name
                 """)
@@ -30,10 +30,9 @@ class SongsRepository:
                                 id=str(row[0]),
                                 name=row[1],
                                 file_path=row[2],
-                                file_name=row[3],
-                                file_type=row[4],
-                                artist_id=str(row[5]) if row[5] else None,
-                                genre_id=str(row[6]) if row[6] else None,
+                                file_type=row[3],
+                                artist_id=str(row[4]) if row[4] else None,
+                                genre_id=str(row[5]) if row[5] else None,
                             )
                         )
                     return songs
@@ -50,22 +49,21 @@ class SongsRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, name, file_path, file_name, file_type, artist_id, genre_id
+                    SELECT id, name, file_path, file_type, artist_id, genre_id
                     FROM songs
                     WHERE id = %s
                 """, (song_id,))
-
+                
                 result = cur.fetchone()
-
+                print(f"Retrieved song by id {song_id}: {result}")  # Debugging line
                 if result:
                     return SongOut(
                         id=str(result[0]),
                         name=result[1],
                         file_path=result[2],
-                        file_name=result[3],
-                        file_type=result[4],
-                        artist_id=str(result[5]) if result[5] else None,
-                        genre_id=str(result[6]) if result[6] else None,
+                        file_type=result[3],
+                        artist_id=str(result[4]) if result[4] else None,
+                        genre_id=str(result[5]) if result[5] else None,
                     )
                 return None
 
