@@ -12,3 +12,4 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 # GCP Storage Configuration
 GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "ampify-1")
 GCP_BUCKET_NAME = os.getenv("GCP_BUCKET_NAME", "ampify-assets")
+GCP_SONGS_BUCKET_NAME = os.getenv("GCP_SONGS_BUCKET_NAME", "ampify-songs")
