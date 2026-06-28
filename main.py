@@ -2,9 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import API_PREFIX
-from routers import auth, artists, genres, preferences
+from connection.cockroachDB import init_db
+from routers import auth, artists, genres, preferences, songs, playlists
 
 app = FastAPI()
+
+@app.on_event("startup")
+async def startup_event():
+    init_db()
 
 # Add CORS middleware
 app.add_middleware(
@@ -19,6 +24,8 @@ app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(artists.router, prefix=API_PREFIX)
 app.include_router(genres.router, prefix=API_PREFIX)
 app.include_router(preferences.router, prefix=API_PREFIX)
+app.include_router(songs.router, prefix=API_PREFIX)
+app.include_router(playlists.router, prefix=API_PREFIX)
 
 @app.get("/")
 async def root():
