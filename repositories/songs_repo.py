@@ -28,10 +28,10 @@ class SongsRepository:
                         songs.append(
                             SongOut(
                                 id=str(row[0]),
-                                name=row[1],
-                                file_path=row[2],
+                                title=row[1],
+                                song_url=row[2],
                                 file_type=row[3],
-                                artist_id=str(row[4]) if row[4] else None,
+                                artist=str(row[4]) if row[4] else None,
                                 genre_id=str(row[5]) if row[5] else None,
                             )
                         )
@@ -46,6 +46,7 @@ class SongsRepository:
 
     def get_song_by_id(self, song_id: str) -> Optional[SongOut]:
         conn = get_connection()
+        print(f"hit stream song")
         try:
             with conn.cursor() as cur:
                 cur.execute("""
@@ -59,10 +60,10 @@ class SongsRepository:
                 if result:
                     return SongOut(
                         id=str(result[0]),
-                        name=result[1],
-                        file_path=result[2],
+                        title=result[1],
+                        song_url=result[2],
                         file_type=result[3],
-                        artist_id=str(result[4]) if result[4] else None,
+                        artist=str(result[4]) if result[4] else None,
                         genre_id=str(result[5]) if result[5] else None,
                     )
                 return None

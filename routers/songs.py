@@ -21,8 +21,9 @@ def list_songs():
     return repo.get_all_songs()
 
 
-@router.get("/songs/{song_id}/stream")
+@router.get("/{song_id}/stream")
 def stream_song(song_id: str, request: Request):
+    print(f"hit stream song")
     song = repo.get_song_by_id(song_id)
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
@@ -64,7 +65,8 @@ def stream_song(song_id: str, request: Request):
         # already an object name
         return path
 
-    blob_name = _extract_object_name(song.file_path)
+    blob_name = _extract_object_name(song.song_url)
+    print(f"blob_name: {blob_name}")
     # Prefer stored file_type (MIME) from DB when available
     mime_type = song.file_type or "application/octet-stream"
 
@@ -79,7 +81,7 @@ def stream_song(song_id: str, request: Request):
 
     headers = {
         "Accept-Ranges": "bytes",
-        "Content-Disposition": f'inline; filename="{song.name}"',
+        "Content-Disposition": f'inline; filename="{song.title}"',
     }
 
     if range_header is None:
@@ -136,7 +138,7 @@ def stream_song(song_id: str, request: Request):
 
     headers["Content-Range"] = f"bytes {start}-{end}/{total_size}"
     headers["Content-Length"] = str(content_length)
-
+    print(f"Streaming range {start}-{end} of {blob_name}")
     return StreamingResponse(generator, status_code=206, media_type=mime_type, headers=headers)
 
 
