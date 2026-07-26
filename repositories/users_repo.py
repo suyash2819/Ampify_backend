@@ -110,7 +110,7 @@ class UsersRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, name, email, password_hash, created_at, updated_at
+                    SELECT id, name, email, created_at, updated_at
                     FROM users
                     WHERE id = %s
                 """, (user_id,))
@@ -122,8 +122,8 @@ class UsersRepository:
                         id=result[0],
                         name=result[1],
                         email=result[2],
-                        created_at=result[4],
-                        updated_at=result[5]
+                        created_at=result[3],
+                        updated_at=result[4]
                     )
                 return None
                 

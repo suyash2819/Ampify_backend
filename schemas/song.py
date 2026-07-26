@@ -20,6 +20,6 @@ class SongOut(BaseModel):
     image_url: Optional[str] = None
     song_url: str 
     file_type: Optional[str] = None
-
+    genre_id: Optional[UUID] = None
     class Config:
         from_attributes = True

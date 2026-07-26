@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from core.deps import get_current_user_id
 from core.security import create_access_token, verify_password
 from repositories.users_repo import users_repo
 from schemas.auth import SigninRequest, TokenResponse, SignupResponse
@@ -46,3 +47,15 @@ def signup(payload: UserCreate):
         updated_at=new_user.updated_at,
         access_token=token
     )
+
+
+@router.get("/profile", response_model=UserOut)
+def get_profile(user_id: str = Depends(get_current_user_id)):
+    """Return the authenticated user's profile details."""
+    user = users_repo.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return user
