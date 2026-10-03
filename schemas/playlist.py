@@ -15,6 +15,7 @@ class PlaylistCreate(PlaylistBase):
 class PlaylistOut(PlaylistBase):
     id: UUID
     user_id: UUID
+    is_liked_songs: bool = False
     created_at: datetime
     updated_at: datetime
     songs: List[SongOut] = []

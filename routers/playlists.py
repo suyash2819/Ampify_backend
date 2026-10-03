@@ -19,6 +19,20 @@ def create_new_playlist(
     """Create a new playlist for the authenticated user."""
     return playlists_repo.create_playlist(user_id, playlist)
 
+# ── Liked Songs endpoints ─────────────────────────────────────────────────────
+
+@router.post("/liked-songs", response_model=PlaylistOut)
+def get_or_create_liked_songs(user_id: str = Depends(get_current_user_id)):
+    """Get (or auto-create) the current user's Liked Songs playlist."""
+    return playlists_repo.get_or_create_liked_songs_playlist(user_id)
+
+@router.get("/liked-songs/song-ids", response_model=List[str])
+def get_liked_song_ids(user_id: str = Depends(get_current_user_id)):
+    """Return the list of song IDs the user has liked."""
+    return playlists_repo.get_liked_song_ids(user_id)
+
+# ── Song add / remove ─────────────────────────────────────────────────────────
+
 @router.post("/{playlist_id}/songs/{song_id}")
 def add_song(
     playlist_id: str, 
@@ -26,7 +40,6 @@ def add_song(
     user_id: str = Depends(get_current_user_id)
 ):
     """Add a song to a playlist."""
-    # Note: In a real app, we'd verify user ownership of the playlist here.
     success = playlists_repo.add_song_to_playlist(playlist_id, song_id)
     if not success:
         raise HTTPException(status_code=400, detail="Could not add song to playlist")
@@ -50,7 +63,7 @@ def rename_playlist(
     playlist: PlaylistCreate,
     user_id: str = Depends(get_current_user_id)
 ):
-    """Rename/update a playlist."""
+    """Rename/update a playlist (Liked Songs playlist cannot be renamed)."""
     success = playlists_repo.rename_playlist(playlist_id, user_id, playlist.name, playlist.description)
     if not success:
         raise HTTPException(status_code=400, detail="Could not update playlist")
@@ -61,7 +74,7 @@ def delete_playlist(
     playlist_id: str,
     user_id: str = Depends(get_current_user_id)
 ):
-    """Delete a playlist."""
+    """Delete a playlist (Liked Songs playlist cannot be deleted)."""
     success = playlists_repo.delete_playlist(playlist_id, user_id)
     if not success:
         raise HTTPException(status_code=400, detail="Could not delete playlist")
