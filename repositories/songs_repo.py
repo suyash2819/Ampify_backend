@@ -74,6 +74,40 @@ class SongsRepository:
         finally:
             conn.close()
 
+    def get_songs_by_ids(self, song_ids: List[str]) -> List[dict]:
+        if not song_ids:
+            return []
+
+        conn = get_connection()
+        try:
+            with conn.cursor() as cur:
+                placeholders = ", ".join(["%s"] * len(song_ids))
+                cur.execute(
+                    f"""
+                    SELECT s.id, s.name, a.name, s.image_url, s.file_path
+                    FROM songs s
+                    LEFT JOIN artists a ON s.artist_id = a.id
+                    WHERE s.id IN ({placeholders})
+                    """,
+                    tuple(song_ids),
+                )
+                rows_by_id = {
+                    str(row[0]): {
+                        "id": str(row[0]),
+                        "title": row[1],
+                        "artist": row[2] or "Unknown Artist",
+                        "image_url": row[3],
+                        "song_url": row[4],
+                    }
+                    for row in cur.fetchall()
+                }
+                return [rows_by_id[song_id] for song_id in song_ids if song_id in rows_by_id]
+        except Exception as e:
+            logger.error(f"Error retrieving songs by ids: {e}")
+            raise
+        finally:
+            conn.close()
+
     def search_songs(self, query: str) -> List[SongOut]:
         conn = get_connection()
         try:
