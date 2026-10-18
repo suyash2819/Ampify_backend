@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Depends, Query
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import StreamingResponse, Response
 from repositories.songs_repo import SongsRepository
 from connection.gcp_storage import storage_client
@@ -15,6 +15,94 @@ router = APIRouter()
 repo = SongsRepository()
 
 router = APIRouter(prefix="/songs", tags=["songs"])
+
+@router.post("/upload", response_model=SongOut, status_code=status.HTTP_201_CREATED)
+def upload_song(
+    title: str = Form(..., min_length=1, max_length=255),
+    artist_id: str = Form(...),
+    genre_id: str = Form(...),
+    song_file: UploadFile = File(...),
+    cover_image: UploadFile = File(...),
+    _user_id: str = Depends(get_current_user_id),
+):
+    """Upload a song and its cover image, then create the song record."""
+    normalized_title = title.strip()
+    if not normalized_title:
+        raise HTTPException(status_code=422, detail="Title cannot be blank")
+    if not song_file.content_type or not song_file.content_type.startswith("audio/"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Song file must have an audio content type",
+        )
+    if not cover_image.content_type or not cover_image.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Cover image must have an image content type",
+        )
+
+    song_filename = (song_file.filename or "").replace("\\", "/").rsplit("/", 1)[-1]
+    if not song_filename:
+        raise HTTPException(status_code=422, detail="Song file must have a filename")
+
+    image_filename = (cover_image.filename or "").replace("\\", "/").rsplit("/", 1)[-1]
+    if not image_filename:
+        raise HTTPException(status_code=422, detail="Cover image must have a filename")
+
+    song_blob_name = song_filename
+    image_blob_name = f"images/{image_filename}"
+    uploaded_blobs = []
+
+    try:
+        song_url = storage_client.upload_file_object(
+            song_file.file,
+            song_blob_name,
+            storage_client.songs_bucket_name,
+            song_file.content_type,
+        )
+        uploaded_blobs.append((storage_client.songs_bucket_name, song_blob_name))
+
+        image_url = storage_client.upload_file_object(
+            cover_image.file,
+            image_blob_name,
+            storage_client.bucket_name,
+            cover_image.content_type,
+        )
+        uploaded_blobs.append((storage_client.bucket_name, image_blob_name))
+
+        song = songs_repo.create_song(
+            title=normalized_title,
+            artist_id=artist_id,
+            genre_id=genre_id,
+            song_url=song_url,
+            file_type=song_file.content_type,
+            image_url=image_url,
+        )
+        if not song:
+            raise HTTPException(status_code=404, detail="Artist not found")
+        return song
+    except HTTPException:
+        for bucket_name, blob_name in uploaded_blobs:
+            try:
+                storage_client.delete_from_bucket(bucket_name, blob_name)
+            except Exception:
+                logger.exception(
+                    f"Failed to clean up uploaded blob {blob_name} in {bucket_name}"
+                )
+        raise
+    except Exception as e:
+        for bucket_name, blob_name in uploaded_blobs:
+            try:
+                storage_client.delete_from_bucket(bucket_name, blob_name)
+            except Exception:
+                logger.exception(
+                    f"Failed to clean up uploaded blob {blob_name} in {bucket_name}"
+                )
+        logger.error(f"Failed to upload song: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload song",
+        ) from e
+
 
 @router.get("/")
 def list_songs():

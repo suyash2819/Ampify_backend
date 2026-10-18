@@ -6,7 +6,7 @@ class ArtistOut(BaseModel):
     """Schema for artist response."""
     id: str
     name: str
-
+    genre_id: str
     class Config:
         from_attributes = True
 
