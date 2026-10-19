@@ -16,7 +16,7 @@ class ArtistsRepository:
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT id, name
+                    SELECT id, name, genre_id
                     FROM artists
                     ORDER BY name
                 """)
@@ -25,7 +25,7 @@ class ArtistsRepository:
                 
                 if results:
                     return [
-                        ArtistOut(id=row[0], name=row[1])
+                        ArtistOut(id=row[0], name=row[1], genre_id=row[2])
                         for row in results
                     ]
                 return []

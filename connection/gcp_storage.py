@@ -1,22 +1,26 @@
-from google.cloud import storage
 import logging
+from typing import BinaryIO, Optional
+
+from google.cloud import storage
+
 from core.config import GCP_PROJECT_ID, GCP_BUCKET_NAME, GCP_SONGS_BUCKET_NAME
 
 logger = logging.getLogger(__name__)
 
 class GCPStorageClient:
     def __init__(self):
+        self.client = None
+        self.bucket = None
+        self.songs_bucket = None
+        self.bucket_name = GCP_BUCKET_NAME
+        self.songs_bucket_name = GCP_SONGS_BUCKET_NAME
         try:
             self.client = storage.Client(project=GCP_PROJECT_ID)
-            self.bucket_name = GCP_BUCKET_NAME
-            self.songs_bucket_name = GCP_SONGS_BUCKET_NAME
             self.bucket = self.client.bucket(self.bucket_name)
             self.songs_bucket = self.client.bucket(self.songs_bucket_name)
             logger.info(f"Initialized GCP Storage Client for bucket: {self.bucket_name}")
         except Exception as e:
             logger.error(f"Failed to initialize GCP Storage Client: {e}")
-            self.client = None
-            self.bucket = None
 
     def upload_file(self, file_path: str, destination_blob_name: str) -> str:
         """Uploads a file to the bucket."""
@@ -45,6 +49,46 @@ class GCPStorageClient:
         except Exception as e:
             logger.error(f"Error uploading data: {e}")
             raise e
+
+    def upload_file_object(
+        self,
+        file_object: BinaryIO,
+        destination_blob_name: str,
+        bucket_name: str,
+        content_type: Optional[str] = None,
+    ) -> str:
+        """Upload a file-like object to the requested bucket."""
+        if not self.client:
+            raise RuntimeError("GCP Storage Client not initialized.")
+
+        try:
+            blob = self.client.bucket(bucket_name).blob(destination_blob_name)
+            blob.upload_from_file(
+                file_object,
+                rewind=True,
+                content_type=content_type,
+            )
+            logger.info(
+                f"Uploaded {destination_blob_name} to bucket {bucket_name}."
+            )
+            return blob.public_url
+        except Exception:
+            logger.exception(
+                f"Error uploading {destination_blob_name} to bucket {bucket_name}"
+            )
+            raise
+
+    def delete_from_bucket(self, bucket_name: str, blob_name: str) -> None:
+        """Delete a blob from the requested bucket."""
+        if not self.client:
+            raise RuntimeError("GCP Storage Client not initialized.")
+
+        try:
+            self.client.bucket(bucket_name).blob(blob_name).delete()
+            logger.info(f"Deleted {blob_name} from bucket {bucket_name}.")
+        except Exception:
+            logger.exception(f"Error deleting {blob_name} from bucket {bucket_name}")
+            raise
 
     def download_file(self, source_blob_name: str, destination_file_name: str):
         """Downloads a blob from the bucket."""

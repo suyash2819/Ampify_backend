@@ -35,7 +35,20 @@ Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed
 /getStaticData - GET <br/>
 /userMusicData - POST, GET <br/>
 
+### Upload a song
+
+`POST {API_PREFIX}/songs/upload` requires a bearer token and multipart form data:
+
+- `title`: song title
+- `artist_id`: ID of an existing artist
+- `song_file`: audio file
+- `cover_image`: image file
+
+The audio is uploaded to the configured songs bucket using its original filename.
+The cover image is uploaded to the configured bucket under `images/`, using its
+original filename.
+A successful request returns the created song record.
+
 <h2>Tables</h2>
 
 <img width="968" height="464" alt="image" src="https://github.com/user-attachments/assets/745e3a40-a0bf-4702-bb53-b2c090746ea8" />
-

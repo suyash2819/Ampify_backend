@@ -10,6 +10,53 @@ logger = logging.getLogger(__name__)
 class SongsRepository:
     """Repository for song operations with CockroachDB."""
 
+    def create_song(
+        self,
+        title: str,
+        artist_id: int,
+        genre_id: str,
+        song_url: str,
+        file_type: str,
+        image_url: str,
+    ) -> Optional[SongOut]:
+        """Create a song record for an existing artist."""
+        conn = get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT name FROM artists WHERE id = %s", (artist_id,))
+                artist = cur.fetchone()
+                if not artist:
+                    return None
+
+                cur.execute(
+                    """
+                    INSERT INTO songs (
+                        name, file_path, file_type, artist_id, genre_id, image_url
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                    """,
+                    (title, song_url, file_type, artist_id, genre_id, image_url),
+                )
+                song_id = cur.fetchone()[0]
+                song = SongOut(
+                    id=str(song_id),
+                    title=title,
+                    artist=artist[0],
+                    song_url=song_url,
+                    file_type=file_type,
+                    image_url=image_url,
+                    genre_id=genre_id,
+                )
+                conn.commit()
+                return song
+        except Exception:
+            conn.rollback()
+            logger.exception("Error creating song")
+            raise
+        finally:
+            conn.close()
+
     def get_all_songs(self) -> List[SongOut]:
         conn = get_connection()
         try:
