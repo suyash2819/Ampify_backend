@@ -35,11 +35,41 @@ Include Redis, Messaging Queue / Pub Sub, Load Balancer/API Gateway as needed
 /getStaticData - GET <br/>
 /userMusicData - POST, GET <br/>
 
+### Submit play events
+
+`POST {API_PREFIX}/events` requires a bearer token and accepts a JSON array of
+play-ended events. The authenticated user's ID is taken from the token; clients
+must not send `user_id`.
+
+Each event includes `event_id`, `type` (`play_ended`), `track_id`, `started_at`
+(ISO 8601 timestamp with timezone), `ms_played`, `track_duration_ms`,
+`end_reason` (`finished`, `skipped`, `closed`, or `error`), and `source`
+(`user` or `agent`). `context_type`, `context_id`, `session_id`,
+`queue_instance_id`, `device`, and `app_version` are optional.
+
+Event IDs already stored for that user are ignored, including duplicates within
+the same request. The response reports the number of inserted and duplicate
+events:
+
+```json
+{"inserted": 1, "duplicates": 1}
+```
+
+### Get personalized song suggestions
+
+`GET {API_PREFIX}/songs/suggestions` requires a bearer token and returns up to
+three songs. Recommendations use the user's recent play events and each song's
+`mood`. Skipped songs and their moods are included as negative signals so the
+model can avoid those tracks and moods; a previously skipped track cannot be
+returned as a recommendation. Songs without a mood are not candidates. Set
+`GROQ_KEY` to enable the language-model selection step.
+
 ### Upload a song
 
 `POST {API_PREFIX}/songs/upload` requires a bearer token and multipart form data:
 
 - `title`: song title
+- `mood`: song mood used for personalized recommendations
 - `artist_id`: ID of an existing artist
 - `song_file`: audio file
 - `cover_image`: image file

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import StreamingResponse, Response
 from repositories.songs_repo import SongsRepository
+from Agents.playlist_recommender import pick_next
 from connection.gcp_storage import storage_client
 from typing import List
 from repositories.songs_repo import songs_repo
@@ -19,6 +20,7 @@ router = APIRouter(prefix="/songs", tags=["songs"])
 @router.post("/upload", response_model=SongOut, status_code=status.HTTP_201_CREATED)
 def upload_song(
     title: str = Form(..., min_length=1, max_length=255),
+    mood: str = Form(..., min_length=1),
     artist_id: str = Form(...),
     genre_id: str = Form(...),
     song_file: UploadFile = File(...),
@@ -29,6 +31,9 @@ def upload_song(
     normalized_title = title.strip()
     if not normalized_title:
         raise HTTPException(status_code=422, detail="Title cannot be blank")
+    normalized_mood = mood.strip()
+    if not normalized_mood:
+        raise HTTPException(status_code=422, detail="Mood cannot be blank")
     if not song_file.content_type or not song_file.content_type.startswith("audio/"):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
@@ -71,6 +76,7 @@ def upload_song(
 
         song = songs_repo.create_song(
             title=normalized_title,
+            mood=normalized_mood,
             artist_id=artist_id,
             genre_id=genre_id,
             song_url=song_url,
@@ -237,5 +243,6 @@ def search_songs(query: str = Query(..., min_length=1)):
 
 @router.get("/suggestions", response_model=List[SongOut])
 def get_suggestions(user_id: str = Depends(get_current_user_id)):
-    """Get song suggestions based on user preferences."""
-    return songs_repo.get_suggested_songs(user_id)
+    """Recommend songs based on the user's play history and song audio features."""
+    pick = pick_next(user_id)
+    return songs_repo.get_songs_by_ids(pick.track_ids)

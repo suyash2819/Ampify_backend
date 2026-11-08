@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import API_PREFIX
-from routers import auth, artists, genres, preferences, songs, playlists, queue
+from routers import auth, artists, genres, preferences, songs, playlists, queue, events
 
 app = FastAPI()
 
@@ -23,6 +23,7 @@ app.include_router(preferences.router, prefix=API_PREFIX)
 app.include_router(songs.router, prefix=API_PREFIX)
 app.include_router(playlists.router, prefix=API_PREFIX)
 app.include_router(queue.router, prefix=API_PREFIX)
+app.include_router(events.router, prefix=API_PREFIX)
 
 @app.get("/")
 async def root():
