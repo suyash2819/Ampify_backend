@@ -16,6 +16,7 @@ class SongCreate(SongBase):
 class SongOut(BaseModel):
     id: UUID
     title: str 
+    mood: Optional[str] = None
     artist: str 
     image_url: Optional[str] = None
     song_url: str 

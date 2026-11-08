@@ -1,7 +1,9 @@
 fastapi[standard]
+python-dotenv
 psycopg2-binary
 boto3
 python-jose[cryptography]
 passlib[bcrypt]
 google-cloud-storage
 upstash-redis
+langchain-groq
