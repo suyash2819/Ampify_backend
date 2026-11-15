@@ -22,7 +22,10 @@ jobs:
           cache: pip
 
       - run: pip install -r requirements.txt pytest httpx ruff
-
+      - name: Debug layout
+        run: |
+          ls -la
+          find . -name "main.py" -not -path "./.venv/*"
       # - run: ruff check .
       - run: pytest
         env:
