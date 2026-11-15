@@ -13,6 +13,20 @@ concurrency:
 jobs:
   checks:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,6 +44,6 @@ jobs:
       - run: pytest
         env:
           # dummy values so the app can import; tests must not hit real services
-          DATABASE_URL: "postgresql://user:pass@localhost:26257/test"
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
           REDIS_URL: "redis://localhost:6379"
           JWT_SECRET: "ci-only-secret"
