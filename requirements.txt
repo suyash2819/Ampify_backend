@@ -5,3 +5,6 @@ python-jose[cryptography]
 passlib[bcrypt]
 google-cloud-storage
 upstash-redis
+pytest
+httpx
+ruff
